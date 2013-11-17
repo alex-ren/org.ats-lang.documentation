@@ -18,7 +18,7 @@ Usage
 -------
 The generation of *tag* file includes two steps as follows.
 
-#.  Use *atsopt* to collect information from all the source files you have.
+#.  Use *atsopt* to collect information from the source files you have.
 
     .. code-block:: bash
 
@@ -28,7 +28,7 @@ The generation of *tag* file includes two steps as follows.
 
     .. code-block:: bash
 
-        java -jar atstools.jar --input MYTAGS -c --output tags # "c" is for ctags with vim
+        java -jar atstools.jar --input MYTAGS -c --output tags # "c" for ctags with vim
         java -jar atstools.jar --input MYTAGS -e --output TAGS # "e" for etags with emacs
 
 The next example shows how to generate the tag file for the source files of ATS-Postiats.
