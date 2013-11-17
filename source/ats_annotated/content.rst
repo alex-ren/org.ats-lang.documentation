@@ -1,4 +1,3 @@
-
 .. Last Modified: 11/01/2013
 
 Annotated ATS Programs
@@ -7,9 +6,9 @@ Annotated ATS Programs
 Goal
 ----------------------------------------------
 
-The normal way to start up a programming project using ATS is via imitating an existing
-example. The website serves as a collection of such examples along with intensive
-comments about the usage of ATS in these examples.
+A common way of starting a programming project based on ATS is to imitate a
+similar example in existence. This website collects a set of interesting examples
+containing detailed comments on various programming features supported in ATS.
 
 These examples come primarily from the `Google group for ATS`_.
 
