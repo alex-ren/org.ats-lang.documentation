@@ -12,7 +12,7 @@ multiple files with the support of *tag*. Here, we proivde a tool for generating
 
 Download
 ----------
-Please download the file :download:`atstools.jar </_static/atstools/taggen/atstools.jar>`.
+Please download the file :download:`ats-lang-tools.jar </_static/atstools/taggen/ats-lang-tools.jar>`.
 
 Usage
 -------

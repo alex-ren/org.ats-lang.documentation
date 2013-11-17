@@ -15,7 +15,6 @@ Code
    :language: text
    :linenos:
    :lines: 10-20
-   :linestart: 5
 
 * ``dp_observer.dats``
 
