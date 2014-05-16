@@ -24,26 +24,46 @@ The generation of *tag* file includes two steps as follows.
 
         atsopt -o MYTAGS --taggen -s fact.sats -d fact.dats
 
-#.  Use *atstools.jar* to generate the tag file from *MYTAGS*.
+#.  Use *ats-lang-tools.jar* to generate the tag file from *MYTAGS*.
 
     .. code-block:: bash
 
-        java -jar atstools.jar --input MYTAGS -c --output tags # "c" for ctags with vim
-        java -jar atstools.jar --input MYTAGS -e --output TAGS # "e" for etags with emacs
+        java -jar ats-lang-tools.jar --input MYTAGS -c --output tags # "c" for ctags with vim
+        java -jar ats-lang-tools.jar --input MYTAGS -e --output TAGS # "e" for etags with emacs
 
 The next example shows how to generate the tag file for the source files of ATS-Postiats.
-*atsopt* would output to file *MYTAGS* accululatively, so we can combine *find* and *atsopt*
+Using option *--output-a*, *atsopt* would output to file *MYTAGS* accululatively, so we can combine *find* and *atsopt*
 to generate a large *MYTAGS*.
 
     .. code-block:: bash
 
-        # Assume we are in the root directory of the repository of ATS-Postiats.
         # Make sure we start from a clean slate.
         rm -f MYTAGS
 
-        find ./src -name "*.sats" -exec atsopt -o MYTAGS --taggen -s {} \;
-        find ./src -name "*.dats" -exec atsopt -o MYTAGS --taggen -d {} \;
-        java -jar atstools.jar --input MYTAGS -c --output tags
+        find ${PATSHOME}/src -name "*.sats" -exec atsopt --output-a MYTAGS --taggen -s {} \;
+        find ${PATSHOME}/src -name "*.dats" -exec atsopt --output-a MYTAGS --taggen -d {} \;
+        java -jar ats-lang-tools.jar --input MYTAGS -c --output tags
+
+I use *${PATSHOME}/src* in the *find* command so that the generated *tags* would use absolute
+path for each file. In this way, we can open vim at any location.
+
+The aforementioned method can be applied to ATS-Postiats as well. The following example shows
+how to generate the tag file for source files in the *prelude* of ATS-Postiats, which are written in ATS-Postiats.
+
+    .. code-block:: bash
+
+        PATH_PRELUDE=${PATSHOME}/prelude
+        MYTAGS_PATS_PRELUDE_PATS=${PATH_PRELUDE}/MYTAGS_PATS_PRELUDE_PATS
+     
+        rm -rf ${MYTAGS_PATS_PRELUDE_PATS}
+        # Exclude two subdirectories "CODEGEN" and "DOCUGEN"
+        find ${PATH_PRELUDE}/SATS \( -name "CODEGEN" -o -name "DOCUGEN" \) -prune -o -name "*.sats" \
+          -exec patsopt --output-a ${MYTAGS_PATS_PRELUDE_PATS} --taggen -s {} \;
+        find ${PATH_PRELUDE}/DATS \( -name "CODEGEN" -o -name "DOCUGEN" \) -prune -o -name "*.dats" \
+          -exec patsopt --output-a ${MYTAGS_PATS_PRELUDE_PATS} --taggen -d {} \;
+
+        java -jar ${PATSHOME}/ats-lang-tools.jar -c --input ${MYTAGS_PATS_PRELUDE_PATS} --output ${PATH_PRELUDE}/tags
+     
 
 
 
