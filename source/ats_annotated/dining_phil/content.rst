@@ -19,5 +19,5 @@ Code
 * ``dp_observer.dats``
 
 .. literalinclude:: src/dp_gui.dats
-   :language: bash 
+   :language: text 
    :linenos:

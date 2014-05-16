@@ -13,6 +13,7 @@ Contents:
 
    ats_annotated/content
    atstools/content
+   ats_blog/content
 
 Indices and tables
 ==================
