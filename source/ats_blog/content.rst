@@ -8,4 +8,6 @@ Contents:
    :maxdepth: 2
 
    staload_var/content
+   install_misc/content
+
 
