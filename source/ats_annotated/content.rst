@@ -26,4 +26,5 @@ WireShark has been installed on all the Windows machines in the Instructional La
    :maxdepth: 2
 
    dining_phil/content
+   array0_opr/content
 
