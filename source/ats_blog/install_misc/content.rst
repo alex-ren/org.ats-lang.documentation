@@ -38,4 +38,21 @@ like the following:
 
 .. _ATS' website: http://www.ats-lang.org/DOWNLOAD/#installation_srccomp
 
+Standard *header* files
+--------------------------
+
+For ATS code of "normal" purpose, we would always include the following code.
+
+.. code-block:: sml
+   
+   #include "share/atspre_define.hats"
+   #include "share/atspre_staload.hats"
+
+If we want to generate C code used on lower level systems, such as embedded system, 
+we can replace these *header* files with appropriate ones to fit the targeting
+platform.
+
+
+
+
 
