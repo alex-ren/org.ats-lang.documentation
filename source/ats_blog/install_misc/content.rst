@@ -43,7 +43,7 @@ Standard *header* files
 
 For ATS code of "normal" purpose, we would always include the following code.
 
-.. code-block:: sml
+.. code-block:: none
    
    #include "share/atspre_define.hats"
    #include "share/atspre_staload.hats"
@@ -51,6 +51,13 @@ For ATS code of "normal" purpose, we would always include the following code.
 If we want to generate C code used on lower level systems, such as embedded system, 
 we can replace these *header* files with appropriate ones to fit the targeting
 platform.
+
+Type conversion
+-----------------
+
+.. todo::
+
+   * ``$UNSAFE.cast{natLt(n)}``
 
 
 
