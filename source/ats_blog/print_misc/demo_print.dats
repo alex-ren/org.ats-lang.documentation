@@ -10,6 +10,17 @@ staload _ = "libats/ML/DATS/list0.dats"
 staload "libats/ML/SATS/array0.sats"
 staload _ = "libats/ML/DATS/array0.dats"
 
+// print   good
+// print!  good
+
+// fprint  good
+// fprint! good
+
+// println   no
+// fprintln  no
+
+// println!
+// fprintln!
 
 implement main0 () = let
 
@@ -20,6 +31,7 @@ implement main0 () = let
   val () = fprintln!(out, xs)
   val () = fprintln!(out, xs, ", ")  // with seperator
   val () = (fprint!(out, xs); fprintln!(out))
+  val () = (fprint(out, xs); fprintln!(out))
 
   // list0 int
   val xs = (g0ofg1 (xs)): list0 int
