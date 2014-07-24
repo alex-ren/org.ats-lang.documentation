@@ -32,8 +32,8 @@ Or we can use macros inside **ATS2** compiler, such as the following:
 The macro *PATSHOMERELOC* in **ATS2** compiler is from the environment variable *PATSHOMERELOC*, which
 is set in the environment before executing *patscc* or *patsopt*.
 
-Going further, let's have a look of the file **$PATSHOME/share/HATS/atspre_staload.hats**, which is
-included by the file **$PATSHOME/share/atspre_staload.hats**, which is commonly included in almost
+Going further, let's have a look of the file **$PATSHOME/share/HATS/atspre_define_pdgreloc.hats**, which is
+included by the file **$PATSHOME/share/atspre_define.hats**, which is commonly included in almost
 all *dats* files.
 
 .. code-block:: none
@@ -41,7 +41,6 @@ all *dats* files.
    //
    #define
    ZLOG_targetloc "$PATSHOMERELOC/contrib/zlog"
-   //
    //
    #define
    JSONC_sourceloc "$PATSLIB_URL/contrib/json-c"
