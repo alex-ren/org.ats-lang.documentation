@@ -11,5 +11,6 @@ Contents:
    print_misc/content
    install_misc/content
    ats2cs/content
+   staval/content
 
 
