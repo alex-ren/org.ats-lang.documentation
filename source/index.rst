@@ -15,6 +15,7 @@ Contents:
    atstools/content
    ats_blog/content
    ats_syntax/content
+   conats/content
 
 Indices and tables
 ==================
