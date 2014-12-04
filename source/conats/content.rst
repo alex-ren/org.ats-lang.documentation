@@ -150,6 +150,11 @@ that we want to check there's no deadlock, we add the following code to the ATS 
     #assert main deadlockfree;
     %}
 
+Example of Four-Slot
+
+.. literalinclude:: 20_four_slot.dats
+ :language: text
+ :linenos:
 
 Bibliography
 =====================
