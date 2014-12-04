@@ -8,14 +8,15 @@ stacst min_write: sid
 stacst mw_init: sid
 
 extern val mwp: mc_gv_t (mwp)
-extern val mwi: mc_gv_t (mwi)
-extern val min_write: mc_gv_t (min_write)
-extern val mw_init: mc_gv_t (mw_init)
+extern val mc_mwi: mc_gv_t (mwi)
+extern val mc_min_write: mc_gv_t (min_write)
+extern val mc_mw_init: mc_gv_t (mw_init)
 
-val L = conats_atomref_create {[i:int] int i} (0)
-val R = conats_atomref_create {[i:int] int i}(0)
-val slot = conats_atomarrayref_create {[i:int] int i}(2, 0)
-val data = conats_atomarrayref_create {[i:int] int i}(4, 0)
+typedef int1 = [i:int] int i
+val L = conats_atomref_create {int1} (0)
+val R = conats_atomref_create {int1}(0)
+val slot = conats_atomarrayref_create {int1}(2, 0)
+val data = conats_atomarrayref_create {int1}(4, 0)
 
 (* ******** ******** *)
 
@@ -41,18 +42,18 @@ fun writer (x: data): void = let
 
   prval () = mc_atomic_start ()
   prval () = mc_set_int (mwp, wp)
-  prval () = mc_set_int (mwi, wi)
-  prval () = mc_set_int (min_write, 1)
+  prval () = mc_set_int (mc_mwi, wi)
+  prval () = mc_set_int (mc_min_write, 1)
   prval () = mc_atomic_end ()
 
   val () = write (wp, wi, x)
 
-  prval () = mc_set_int (min_write, 0)
+  prval () = mc_set_int (mc_min_write, 0)
   
   val () = conats_atomarrayref_update (slot, wp, wi)
   val () = conats_atomref_update (L, wp)
 
-  prval () = mc_set_int (mw_init, 1)
+  prval () = mc_set_int (mc_mw_init, 1)
 in
 end
 
@@ -71,21 +72,18 @@ absprop initialized
 extern prfun is_initialized {w_init: int | w_init > 0} 
 (pf: int_value_of (mw_init, w_init)): initialized
 
-fun negation {x: bool} .<>. (x: bool x):<fun0> bool (~x) = ~x
-
-fun reader (pf: initialized |): data = let
-  // typedef myint = [i:int] int i
+fun reader (pf: initialized): data = let
   val rp = conats_atomref_get (L)
   val () = conats_atomref_update (R, rp)
-  val ri = conats_atomarrayref_get  (slot, rp) // {[i:int] int i}
+  val ri = conats_atomarrayref_get (slot, rp) // {[i:int] int i}
 
   prval () = mc_atomic_start ()
   prval (pfwp | wp) = mc_get_int (mwp)
-  prval (pfwi | wi) = mc_get_int (mwi)
-  prval (pf_in | in_write) = mc_get_int (min_write)
+  prval (pfwi | wi) = mc_get_int (mc_mwi)
+  prval (pf_in | in_write) = mc_get_int (mc_min_write)
   prval () = mc_atomic_end ()
 
-  prval () = mc_assert(negation(comp3(in_write = 1, wp = rp, wi = ri)))
+  prval () = mc_assert(~(comp3(in_write = 1, wp = rp, wi = ri)))
   
   val x = read (pf_in, pfwp, pfwi | rp, ri)
 in
@@ -99,10 +97,10 @@ in
 end
 
 fun loop_read (arg: int): void = let
-  prval (pf | w_init) = mc_get_int (mw_init)
+  prval (pf | w_init) = mc_get_int (mc_mw_init)
   prval () = mc_assert (w_init > 0)
   prval pf_init = is_initialized pf
-  val x = reader (pf_init |)
+  val x = reader pf_init
 in
   loop_read (arg)
 end
