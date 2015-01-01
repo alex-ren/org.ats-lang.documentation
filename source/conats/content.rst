@@ -4,37 +4,41 @@ Model Checking ATS
 =====================================
 
 In this project, we focus on integrating model checking techniques seamlessly into
-the development of ATS program. Before going to the details, let's have a quick look
-of the process of verifying a concurrent ATS program.
+the development of ATS program and ultimately build a practical system for 
+verifying concurrent ATS program.
 
-The Producer-consumer problem is a classic one in concurrent programming. A recommanded
-implementation is described in the documentation of ATS [1]_. It involves usage of
-mutex and condition variable. The type system of ATS can help eliminate some common mistakes.
-However, a well-typed implementation can still have deadlock. Model checking technique
-can then help detect such bug and provide the corresponding counterexample.
+Before going to the details, let's have a quick look of how the methodology looks like.
 
-The code snippets for Producer-consumer problem are given below. First, we create the
-shared object for producer and consumer to communicate with each other. To simplify
-the problem without losing generosity, the shared object just contains a linear buffer
-holding one integer. To produce one item means to increase the number stored in 
-the buffer. We give out the definition of the linear buffer 
+The producer-consumer problem is a classic one in field of concurrent programming. A recommanded
+implementation is described in the documentation of ATS [1]_, which exploits the type system of
+ATS to better ensure the correctness of the program. Certain mistakes, as stated below, can
+be avoided, which is great.
+However, a well-typed implementation for producer-consumer problem in ATS may still cause
+deadlock. And it's very difficult to soly rely on type system to capture such errors. Therefore, we
+start seeking help from other techniques, among which model checking is our pick here. It
+can help detect bugs related to temporal properties in concurrent systems and provide 
+corresponding counterexamples. To apply the model checking technique, we need to form up
+the precise semantics of ATS programs, which in turn requires the precise semantics of those
+concurrency primitives related to communication and synchronization. We form up a collection 
+of such primitives, based on which programers can build concurrent program in ATS with semantics
+meanful to the model checking techniques we employ here. Such collection is given 
+in the file `conats.sats <https://github.com/alex-ren/org.ats-lang.postiats.jats/blob/master/
+utfpl/src/jats/utfpl/stfpl/test/conats.sats>`_. It also contains some other primitives used
+for model checking, which we shall explain as we see more examples.
 
-A shared object is similar to the concept of monitor in the field of concurrent 
-programming. It contains a mutex and a condition variable, which are used to protect
-the resource, which in the example is of linear type *lin_buffer int*.
+The complete implementation for producer-consumer problem can be found here todo. 
+You can also read, modify, and verify the implementation via our website for model 
+checking todo. We illustrate some of the code snippets below.
 
-We use three functions in the definitions of those operations of the linear buffer,
-which are *conats_atomref_create*, *conats_atomref_get*, and *conats_atomref_update*.
-They are library functions which have special semantics to the model checker we build.
-In short, to be able to model check the ATS program, we have to use such library
-functions to build the linear buffer. The types for these library functions can be found
-in `conats.sats <https://github.com/alex-ren/org.ats-lang.postiats.jats/blob/master/
-utfpl/src/jats/utfpl/stfpl/test/conats.sats>`_.
-
+As indicated in [1]_, a shared object contains a linear object, which in this example is
+a linear buffer. The primitives provided in *conats.sats* do not support such type.
+Therefore we define a linear type *lin_buffer* as well as corresponding functions for
+manupulating objects of such type, which is given below.
 
 .. code-block:: text
   :linenos:
 
+    // Define linear buffer to prevent resource leak.
     absviewtype lin_buffer (a:t@ype)
     
     fun lin_buffer_create {a:t@ype} (
@@ -62,11 +66,69 @@ utfpl/src/jats/utfpl/stfpl/test/conats.sats>`_.
     in
       (lref, v)
     end
+
+Three functions *conats_atomref_create*, *conats_atomref_update*, and
+*conats_atomref_get* are declared in *conats.sats*. Intuitively, they are used for
+creating a mutable object whose content can be accessed in an atomic manner.
+
+In our example, we only need a linear buffer whose content is an integer. The following
+code defines the type for such linear buffer *demo_buffer* and some auxiliary functions
+for accessing it.
+
+.. code-block:: text
+  :linenos:
+
+    // Define linear integer buffer for demonstration.
+    viewtypedef demo_buffer = lin_buffer int
     
-    val lin_ref: lin_buffer int = lin_buffer_create (0)
+    fun demo_buffer_isful (buf: demo_buffer): (demo_buffer, bool) = let
+      val (buf, len) = lin_buffer_get (buf)
+    in
+      (buf, len > 2)  // Assume the buffer can only hold 2 elements.
+    end
     
-    val s = conats_shared_create {lin_buffer (int)}(lin_ref)
-        
+    fun demo_buffer_isnil (buf: demo_buffer): (demo_buffer, bool) = let
+      val (buf, len) = lin_buffer_get (buf)
+    in
+      (buf, len <= 0)
+    end
+    
+    fun demo_buffer_insert (buf: demo_buffer): demo_buffer = let
+      val (buf, len) = lin_buffer_get (buf)
+      val buf = lin_buffer_update (buf, len + 1)
+    in 
+      buf
+    end
+    
+    fun demo_buffer_takeout (buf: demo_buffer): demo_buffer = let
+      val (buf, len) = lin_buffer_get (buf)
+      val buf = lin_buffer_update (buf, len - 1)
+    in 
+      buf
+    end
+
+One thing worth mentioning is the number 2 we choose as the capacity of the virtual
+buffer shared by producer and consumer. In reality, a shared buffer may have a large
+capacity. But a big number may cause model checking not to be able to detect the
+potential bugs. Arguably, if our implementation is correct for a small capacity of
+shared buffer, it has better chances to be correct as well for large capacity.
+    
+Now we can create the linear buffer holding integer and then put it into a shared object
+which can be accessed by multiple threads.
+    
+.. code-block:: text
+  :linenos:
+
+    // Create a buffer for model construction.
+    val db: demo_buffer = lin_buffer_create (0)
+    
+    // Turn a linear buffer into a shared buffer.
+    val s = conats_shared_create {demo_buffer}(db)
+    
+*conats_shared_create* is a function declared in *conats.sats*, whose semantics is about
+creating an shared object protecting its content via mutex and condition variables.
+
+todo
 In the following code, *producer* is a function which keeps increasing the
 counter inside the linear buffer until it reaches 2, and then wait there
 until the counter gets decreased. *consumer* is a function which keeps decreasing
