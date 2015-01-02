@@ -114,7 +114,7 @@ potential bugs. Arguably, if our implementation is correct for a small capacity 
 shared buffer, it has better chances to be correct as well for large capacity.
     
 Now we can create the linear buffer holding integer and then put it into a shared object
-which can be accessed by multiple threads.
+which can be accessed by multiple threads. The corresponding code is shown below.
     
 .. code-block:: text
   :linenos:
@@ -128,68 +128,85 @@ which can be accessed by multiple threads.
 *conats_shared_create* is a function declared in *conats.sats*, whose semantics is about
 creating an shared object protecting its content via mutex and condition variables.
 
-todo
-In the following code, *producer* is a function which keeps increasing the
-counter inside the linear buffer until it reaches 2, and then wait there
-until the counter gets decreased. *consumer* is a function which keeps decreasing
-the counter inside the linear buffer until it reaches 0, and then wait there
-until the counter gets increased. 
+We now give out the code for producer and consumer. For the purpose of model
+checking, *producer* is actually a function which keeps increasing the
+counter inside the linear buffer whenever possible. If the capacity is reached, 
+the producer would wait until the consumer takes out (by decreasing the counter)
+something out of the buffer. The same idea applies to the *consumer* functions.
+Notably, both *producer* and *consumer* would wake up the potentially waiting counterpart by
+sending a signal.
 
 .. code-block:: text
   :linenos:
-    
+
+    // Keep adding elements into buffer.
     fun producer (x: int):<fun1> void = let
-      val ref = conats_shared_acquire (s)
+      val db = conats_shared_acquire (s)
     
-      fun loop (ref: lin_buffer int):<cloref1> void = let
-        val (ref, v) = lin_buffer_get (ref)
+      fun insert (db: demo_buffer):<cloref1> demo_buffer = let
+        val (db, isful) = demo_buffer_isful (db)
       in
-        if v = 2 then let
-          val ref = conats_shared_condwait (s, ref)
+        if isful then let
+          val db = conats_shared_condwait (s, db)
         in
-          loop (ref)
+          insert (db)
         end else let 
-          val (ref, v) = lin_buffer_get (ref)
-          val ref = lin_buffer_update (ref, v + 1)
-          val ref = conats_shared_signal (s, ref)
+          val (db, isnil) = demo_buffer_isnil (db)
+          val db = demo_buffer_insert (db)
         in
-          loop (ref)
+          if isnil then conats_shared_signal (s, db)
+          else db
         end
       end
+      
+      val db = insert (db)
+      val () = conats_shared_release (s, db); 
     in
-      loop (ref)
+      producer (x)
     end
     
+    // Keep removing elements from buffer.
     fun consumer (x: int):<fun1> void = let
-      val ref = conats_shared_acquire (s)
+      val db = conats_shared_acquire (s)
     
-      fun loop (ref: lin_buffer int):<cloref1> void = let
-        val (ref, v) = lin_buffer_get (ref)
+      fun takeout (db: demo_buffer):<cloref1> demo_buffer = let
+        val (db, isnil) = demo_buffer_isnil (db)
       in
-        if v = 0 then let
-          val ref = conats_shared_condwait (s, ref)
+        if isnil then let
+          val db = conats_shared_condwait (s, db)
         in
-          loop (ref)
+          takeout (db)
         end else let
-          val (ref, v) = lin_buffer_get (ref)
-          val ref = lin_buffer_update (ref, v - 1)
-          val ref = conats_shared_signal (s, ref)
+          val (db, isful) = demo_buffer_isful (db)
+          val db = demo_buffer_takeout (db)
         in
-          loop (ref)
+          if isful then let
+    //        val db = conats_shared_signal (s, db)
+          in db end
+          else db
         end
       end
+    
+      val db = takeout (db)
+      val () = conats_shared_release (s, db); 
     in
-      loop (ref)
+      consumer (x)
     end
 
 Due to the usage of linear type of ATS, ATS compiler would complain if a programmer forgets
-to acquire the mutex before updating the counter. However, the type checking won't be
+to call *conats_shared_acquire* to acquire the mutex (which is inside the shared object)
+before updating the counter, or *conats_shared_release* to release the mutex. 
+However, type checking won't be
 able to detect the potential deadlock if the producer or consumer doesn't call the
 *conats_shared_signal* function.
 
-To be able to detect such bug, we need to set up the environment in which we can model
-checking the implemenation of producer and consumer. In the following code, we simply
-create two threads in the program, one for producer and one for consumer.
+Model checking can help detect the aforementioned bug. However, unlike type checking,
+model checking can only be applied to a runable program instead of a collection of functions.
+Therefore we set up the environment as follows so that we have a complete model. The
+model consists of two threads, one for producer and one for consumer. The
+*conats_tid_allocate* and *conats_thread_create* functions are provided by
+*conats.sats*. Intuitively, they are used for allocating thread id and creating new
+thread with a given function.
 
 .. code-block:: text
   :linenos:
@@ -200,10 +217,8 @@ create two threads in the program, one for producer and one for consumer.
     val () = conats_thread_create(producer, 0, tid1)
     val () = conats_thread_create(consumer, 0, tid2)
 
-We build a tool, which is able to extract a model from the ATS program given above. The
-model is encoded in a modeling langauge CSP#. We then use the state-of-art model checker
-`PAT <http://www.comp.nus.edu.sg/~pat/>`_ to check the generated model. To inform PAT
-that we want to check there's no deadlock, we add the following code to the ATS program.
+Since model checking allows us to verify various properties of a program, we specify as
+follows that we want to verify that our program does not have deadlock.
 
 .. code-block:: text
   :linenos:
@@ -212,11 +227,52 @@ that we want to check there's no deadlock, we add the following code to the ATS 
     #assert main deadlockfree;
     %}
 
-Example of Four-Slot
+So far we have implemented the producer-consumer problem. With the appropriate
+implementations of functions from *conats.sats*, we can compile and run the ATS program.
+Due to the nondeterminism caused by concurrency, the potential deadlock may not happen
+during several runnings. But with model checking, we are guaranteed that there is no
+deadlock if our implementation can pass the model checking.
 
-.. literalinclude:: 20_four_slot.dats
- :language: text
- :linenos:
+The model checking process goes as follows.  We build a tool, which is able to 
+extract a model from the ATS program given above.  Currently, the extracted model is 
+in the modeling langauge CSP#. We then use the state-of-art model checker
+`PAT <http://www.comp.nus.edu.sg/~pat/>`_ to check the generated model. To ease the
+whole process, we set up a website for readers to try this methodology on-line. `Model
+Checking ATS <http://54.149.186.200>`_. The aforementioned example can be found under the
+name "16_reader_writer.dats" in the dropdown list "Select ATS Example". We are working
+on building tools to better relate the model checking result (counterexample) to the original ATS
+program. However, it's still quite informative just by inspecting the current result of
+the model checker since the extracted model in CSP# is quite readable. As for the
+example, if we omit *conats_shared_signal* in *consumer*, model checking would give out
+the following result including the trace leading to the deadlock. (We omit the detail
+of the trace here for clarity purpose.)
+
+.. code-block:: text
+
+  =======================================================
+  Assertion: main() deadlockfree
+  ********Verification Result********
+  The Assertion (main() deadlockfree) is NOT valid.
+  The following trace leads to a deadlock situation.
+  <init -> main_init -> main61_id_s1.0 -> lin_buffer_create_63_s1.0 -> main61_id_s2.0 -> ......
+  
+  ********Verification Setting********
+  Admissible Behavior: All
+  Search Engine: First Witness Trace using Depth First Search
+  System Abstraction: False
+  
+  
+  ********Verification Statistics********
+  Visited States:1124
+  Total Transitions:1323
+  Time Used:0.1101624s
+  Estimated Memory Used:17940.48KB
+
+.. Example of Four-Slot
+.. 
+.. .. literalinclude:: 20_four_slot.dats
+..  :language: text
+..  :linenos:
 
 Bibliography
 =====================
