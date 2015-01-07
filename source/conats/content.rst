@@ -7,8 +7,10 @@ In this project, we focus on integrating model checking techniques seamlessly in
 the development of ATS program and ultimately build a practical system for 
 verifying concurrent ATS program.
 
-Before going to the details, let's have a quick look of how the methodology looks like.
+Tutorial
+-----------
 
+Before going to the details, let's have a quick look of how the methodology looks like.
 The producer-consumer problem is a classic one in field of concurrent programming. A recommanded
 implementation is described in the documentation of ATS [1]_, which exploits the type system of
 ATS to better ensure the correctness of the program. Certain mistakes, as stated below, can
@@ -41,30 +43,29 @@ manupulating objects of such type, which is given below.
     // Define linear buffer to prevent resource leak.
     absviewtype lin_buffer (a:t@ype)
     
-    fun lin_buffer_create {a:t@ype} (
-      data: a): lin_buffer a = let
-      val ref = conats_atomref_create (data)
-      val lref = $UN.castvwtp0 {lin_buffer a} (ref)
+    local
+      assume lin_buffer (a) = atomref (a)
     in
-      lref
-    end
-    
-    fun lin_buffer_update {a:t@ype} (
-      lref: lin_buffer a, data: a): lin_buffer a = let
-      val ref = $UN.castvwtp0 {atomref a} (lref)
-      val () = conats_atomref_update (ref, data)
-      val lref = $UN.castvwtp0 (ref)
-    in
-      lref
-    end
-    
-    fun lin_buffer_get {a:t@ype} (
-      lref: lin_buffer a): (lin_buffer a, a) = let
-      val ref = $UN.castvwtp0 {atomref a} (lref)
-      val v = conats_atomref_get ref
-      val lref = $UN.castvwtp0 (ref)
-    in
-      (lref, v)
+      fun lin_buffer_create {a:t@ype} (
+        data: a): lin_buffer a = let
+        val ref = conats_atomref_create (data)
+      in
+        ref
+      end
+      
+      fun lin_buffer_update {a:t@ype} (
+        lref: lin_buffer a, data: a): lin_buffer a = let
+        val () = conats_atomref_update (lref, data)
+      in
+        lref
+      end
+      
+      fun lin_buffer_get {a:t@ype} (
+        lref: lin_buffer a): (lin_buffer a, a) = let
+        val v = conats_atomref_get lref
+      in
+        (lref, v)
+      end
     end
 
 Three functions *conats_atomref_create*, *conats_atomref_update*, and
@@ -181,7 +182,8 @@ sending a signal.
           val db = demo_buffer_takeout (db)
         in
           if isful then let
-    //        val db = conats_shared_signal (s, db)
+            // Omitting the following would cause deadlock
+            // val db = conats_shared_signal (s, db)
           in db end
           else db
         end
@@ -237,7 +239,7 @@ The model checking process goes as follows.  We build a tool, which is able to
 extract a model from the ATS program given above.  Currently, the extracted model is 
 in the modeling langauge CSP#. We then use the state-of-art model checker
 `PAT <http://www.comp.nus.edu.sg/~pat/>`_ to check the generated model. To ease the
-whole process, we set up a website for readers to try this methodology on-line. `Model
+whole process, we set up a website for readers to try this methodology on-line: `Model
 Checking ATS <http://54.149.186.200>`_. The aforementioned example can be found under the
 name "16_reader_writer.dats" in the dropdown list "Select ATS Example". We are working
 on building tools to better relate the model checking result (counterexample) to the original ATS
@@ -258,15 +260,33 @@ of the trace here for clarity purpose.)
   
   ********Verification Setting********
   Admissible Behavior: All
-  Search Engine: First Witness Trace using Depth First Search
+  Search Engine: Shortest Witness Trace using Breadth First Search
   System Abstraction: False
   
   
   ********Verification Statistics********
-  Visited States:1124
-  Total Transitions:1323
-  Time Used:0.1101624s
-  Estimated Memory Used:17940.48KB
+  Visited States:2392
+  Total Transitions:4588
+  Time Used:0.3925891s
+  Estimated Memory Used:24059.904KB
+
+Next we will illustrate more features of this methodology of combining type checking of ATS
+programming langauge with model checking technique to verify properties of concurrent programs.
+
+Table of Contents
+--------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   sec01/content
+   sec02/content
+   sec03/content
+   sec04/content
+   sec05/content
+   sec06/content
+   sec07/content
+   sec08/content
 
 .. Example of Four-Slot
 .. 
