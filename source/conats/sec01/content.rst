@@ -78,6 +78,11 @@ One thing worth mentioning is the type of *mc_assert* as shown below:
 
   prfun mc_assert {b: bool} (x: bool b):<fun> [b == true] void
 
+The type of the argument of *mc_assert* depends on a boolean value *b* in the statics of
+ATS. *mc_assert* assures the type system that *b* is true and as such the type checking
+of the whole program may be established successfully. Also the validity of such
+assertion is checking during the process of model checking.
+
 
 
 
