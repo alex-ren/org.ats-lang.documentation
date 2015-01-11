@@ -1,5 +1,7 @@
 .. Document for Model Checking ATS
 
+.. include:: conats.hrst
+
 Model Checking ATS
 =====================================
 
@@ -24,8 +26,7 @@ the precise semantics of ATS programs, which in turn requires the precise semant
 concurrency primitives related to communication and synchronization. We form up a collection 
 of such primitives, based on which programers can build concurrent program in ATS with semantics
 meanful to the model checking techniques we employ here. Such collection is given 
-in the file `conats.sats <https://github.com/alex-ren/org.ats-lang.postiats.jats/blob/master/
-utfpl/src/jats/utfpl/stfpl/test/conats.sats>`_. It also contains some other primitives used
+in the file |conats.sats|_. It also contains some other primitives used
 for model checking, which we shall explain as we see more examples.
 
 The complete implementation for producer-consumer problem can be found here todo. 
@@ -33,7 +34,7 @@ You can also read, modify, and verify the implementation via our website for mod
 checking todo. We illustrate some of the code snippets below.
 
 As indicated in [1]_, a shared object contains a linear object, which in this example is
-a linear buffer. The primitives provided in *conats.sats* do not support such type.
+a linear buffer. The primitives provided in |conats.sats|_ do not support such type.
 Therefore we define a linear type *lin_buffer* as well as corresponding functions for
 manupulating objects of such type, which is given below.
 
@@ -69,7 +70,7 @@ manupulating objects of such type, which is given below.
     end
 
 Three functions *conats_atomref_create*, *conats_atomref_update*, and
-*conats_atomref_get* are declared in *conats.sats*. Intuitively, they are used for
+*conats_atomref_get* are declared in |conats.sats|_. Intuitively, they are used for
 creating a mutable object whose content can be accessed in an atomic manner.
 
 In our example, we only need a linear buffer whose content is an integer. The following
@@ -126,7 +127,7 @@ which can be accessed by multiple threads. The corresponding code is shown below
     // Turn a linear buffer into a shared buffer.
     val s = conats_shared_create {demo_buffer}(db)
     
-*conats_shared_create* is a function declared in *conats.sats*, whose semantics is about
+*conats_shared_create* is a function declared in |conats.sats|_, whose semantics is about
 creating an shared object protecting its content via mutex and condition variables.
 
 We now give out the code for producer and consumer. For the purpose of model
@@ -207,7 +208,7 @@ model checking can only be applied to a runable program instead of a collection 
 Therefore we set up the environment as follows so that we have a complete model. The
 model consists of two threads, one for producer and one for consumer. The
 *conats_tid_allocate* and *conats_thread_create* functions are provided by
-*conats.sats*. Intuitively, they are used for allocating thread id and creating new
+|conats.sats|_. Intuitively, they are used for allocating thread id and creating new
 thread with a given function.
 
 .. code-block:: text
@@ -230,7 +231,7 @@ follows that we want to verify that our program does not have deadlock.
     %}
 
 So far we have implemented the producer-consumer problem. With the appropriate
-implementations of functions from *conats.sats*, we can compile and run the ATS program.
+implementations of functions from |conats.sats|_, we can compile and run the ATS program.
 Due to the nondeterminism caused by concurrency, the potential deadlock may not happen
 during several runnings. But with model checking, we are guaranteed that there is no
 deadlock if our implementation can pass the model checking.
