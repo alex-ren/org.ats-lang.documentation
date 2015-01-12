@@ -87,12 +87,58 @@ below.
     fun conats_sharedn_condwait {a: viewt@ype} {i,n:nat | i < n} (s: shared_t (a, n), i: int i, ele: a): a
 
 With such shared object, we can now set up two condition variables handling both full
-and empty buffers separately. The complete code can be download here todo
+and empty buffers separately. The complete code can be download here 
+:download:`16_2_producer_consumer_m_1_2cond.dats`. A snappet of code for the producer
+is shown below.
     
+.. code-block:: text
+  :linenos:
+
+    // Keep adding elements into buffer.
+    fun producer (x: int):<fun1> void = let
+      val db = conats_shared_acquire (s)
+    
+      fun insert (db: demo_buffer):<cloref1> demo_buffer = let
+        val (db, isful) = demo_buffer_isful (db)
+      in
+        if isful then let
+          val db = conats_sharedn_condwait (s, NOTEMP, db)
+        in
+          insert (db)
+        end else let 
+          val (db, isnil) = demo_buffer_isnil (db)
+          val db = demo_buffer_insert (db)
+        in
+          if isnil then conats_sharedn_signal (s, NOTFUL, db)
+          else db
+        end
+      end
+      
+      val db = insert (db)
+      val () = conats_shared_release (s, db); 
+    in
+      producer (x)
+    end
+
+In this implemenation, producer only signals the condition variable when the buffer
+is actually empty at that moment. This would lead to the missing of signal if we have
+multiple producers and consumers. (Please refer to [2]_.) In the example
+:download:`16_3_producer_consumer_m_m_signal.dats`, there is two producers, each of
+which inserts only one element, and two consumers, each of which takes out one
+element. And the problem of miss signal would lead to deadlock. The model checker
+would demonstrate this by a counterexample. One remedy is to sigal the condition
+variable every time. The other is to use *conats_sharedn_wait* instead of
+*conats_sharedn_signal*.
+
+
+
+
+
 Bibliography
 ------------------------
 
 .. [1] http://en.wikipedia.org/wiki/Monitor_%28synchronization%29
+.. [2] todo
 
 
 
