@@ -9,6 +9,8 @@ In this project, we focus on integrating model checking techniques seamlessly in
 the development of ATS program and ultimately build a practical system for 
 verifying concurrent ATS program.
 
+.. _tutorial_label:
+
 Tutorial
 -----------
 
@@ -74,7 +76,7 @@ Three functions *conats_atomref_create*, *conats_atomref_update*, and
 creating a mutable object whose content can be accessed in an atomic manner.
 
 In our example, we only need a linear buffer whose content is an integer. The following
-code defines the type for such linear buffer *demo_buffer* and some auxiliary functions
+code defines the type *demo_buffer* for such linear buffer and some auxiliary functions
 for accessing it.
 
 .. code-block:: text
@@ -86,7 +88,7 @@ for accessing it.
     fun demo_buffer_isful (buf: demo_buffer): (demo_buffer, bool) = let
       val (buf, len) = lin_buffer_get (buf)
     in
-      (buf, len > 2)  // Assume the buffer can only hold 2 elements.
+      (buf, len > 0)  // Assume the buffer can only hold 1 elements.
     end
     
     fun demo_buffer_isnil (buf: demo_buffer): (demo_buffer, bool) = let
@@ -109,7 +111,7 @@ for accessing it.
       buf
     end
 
-One thing worth mentioning is the number 2 we choose as the capacity of the virtual
+One thing worth mentioning is the number 1 we choose as the capacity of the virtual
 buffer shared by producer and consumer. In reality, a shared buffer may have a large
 capacity. But a big number may cause model checking not to be able to detect the
 potential bugs. Arguably, if our implementation is correct for a small capacity of
@@ -240,8 +242,8 @@ The model checking process goes as follows.  We build a tool, which is able to
 extract a model from the ATS program given above.  Currently, the extracted model is 
 in the modeling langauge CSP#. We then use the state-of-art model checker
 `PAT <http://www.comp.nus.edu.sg/~pat/>`_ to check the generated model. To ease the
-whole process, we set up a website for readers to try this methodology on-line: `Model
-Checking ATS <http://54.149.186.200>`_. The aforementioned example can be found under the
+whole process, we set up a website for readers to try this methodology online:
+|mcats|_. The aforementioned example can be found under the
 name "16_reader_writer.dats" in the dropdown list "Select ATS Example". We are working
 on building tools to better relate the model checking result (counterexample) to the original ATS
 program. However, it's still quite informative just by inspecting the current result of
@@ -296,7 +298,7 @@ Table of Contents
 ..  :linenos:
 
 Bibliography
-=====================
+--------------------------
 
 .. [1] http://ats-lang.sourceforge.net/EXAMPLE/EFFECTIVATS/Producer-Consumer/main.html
 

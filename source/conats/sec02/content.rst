@@ -2,6 +2,7 @@
 
 .. include:: ../conats.hrst
 
+
 Towards Concurrent Program
 =====================================
 
@@ -14,14 +15,84 @@ absence of deadlock, liveness properties, and etc. Such incapability triggers ou
 research in corporating model checking techniques into the verification process of ATS
 program.
 
+Primitives for Concurrent Programming
+-----------------------------------------
+
 But first of all, programmers have to be able to write concurrent programs in ATS.
 Currently, we add a set of primitives into ATS programming language to support concurrent
-programming in a style similar to using pthead. As the research goes on, we will add more 
+programming in a style similar to using pthead. In the near future, we will add more 
 primitives (e.g. channel, future) supporting different styles of concurrent programming.
 
 The declarations of these primitives can be found in |conats.sats|_. In the
-tutorial, we already used 
+:ref:`tutorial_label`, we already use *conats_shared_create*, *conats_shared_acquire*,
+*conats_shared_condwait*, *conats_shared_signal*, and *conats_shared_release*, whose
+types are declared as follows:
 
-todo example of multiple producer-consumer
+.. code-block:: text
+  :linenos:
+
+    abstype shared_t (viewt@ype, int)
+    typedef shared (a:viewt@ype) = shared_t (a, 1)
+    
+    fun conats_shared_create {a: viewt@ype} (ele: a): shared (a)
+    
+    fun conats_shared_acquire {a: viewt@ype} {n:pos} (s: shared_t (a, n)): a
+    fun conats_shared_release {a: viewt@ype} {n:pos} (s: shared_t (a, n), ele: a): void
+    
+    fun conats_shared_signal {a: viewt@ype} (s: shared (a), ele: a): a
+    fun conats_shared_condwait {a: viewt@ype} (s: shared (a), ele: a): a
+    
+
+
+*conats_shared_create* creates a shared object (of type *shared a*) holding
+a linear buffer. The concept of shared object is similar to that of monitor
+[1]_. The types of the aforementioned functions guarantee they are invoked
+appropriately in a non-object-oriented language like ATS. (E.g. we have to call
+*conats_shared_acquire* before invoking *conats_shared_condwait* and
+*conats_shared_signal*. From the perspective of pthread programming, a shared object
+consists of a mutex and a condition variable working together for synchronization
+purpose.
+
+However, sometimes it's not enough for a shared object to contain just one condition
+varialbe. For example, in :ref:`tutorial_label`, the shared object has only one
+condition varialbe, which is used to indicate two situations: buffer is full or
+empty. The example has no deadlock because it only has one producer and one consumer.
+Simply adding one more consumer to the example would lead to potential deadlock. The
+complete code can be downloaded here :download:`16_1_producer_consumer_m_1.dats 
+<16_1_producer_consumer_m_1.dats>`. You can also find this example at our website |mcats|_.
+One example of the potential deadlock can be thought as follows: Initially, the
+shared buffer is empty. Two consumers come and wait on the shared object. The
+producer comes and puts one element into the buffer and then wake up one consumer.
+However, the newly active consumer doesn't execute instantly. Instead, the
+producer comes again, tries to put another element into the buffer, and has to wait
+on the shared object since the capacity of the buffer is 1. Then the newly active
+consumer gets one element out of the buffer and wakes up another consumer. At this
+moment, the buffer is empty, the producer is waiting, and two consumers won't signal
+the shared buffer any more. And this leads to a deadlock. The counterexample found by
+the model checker by Breadth First Search confirms with our speculation.
+
+To solve this problem, we also provide another version of shared object which
+contains multiple condition variables. The types of related functions are shown
+below.
+
+.. code-block:: text
+  :linenos:
+
+    abstype shared_t (viewt@ype, int)
+    
+    fun conats_sharedn_create {a: viewt@ype} {n:pos} (ele: a, n: int n): shared_t (a, n)
+
+    fun conats_sharedn_signal {a: viewt@ype} {i,n:nat | i < n} (s: shared_t (a, n), i: int i, ele: a): a
+
+    fun conats_sharedn_condwait {a: viewt@ype} {i,n:nat | i < n} (s: shared_t (a, n), i: int i, ele: a): a
+
+With such shared object, we can now set up two condition variables handling both full
+and empty buffers separately. The complete code can be download here todo
+    
+Bibliography
+------------------------
+
+.. [1] http://en.wikipedia.org/wiki/Monitor_%28synchronization%29
+
 
 
