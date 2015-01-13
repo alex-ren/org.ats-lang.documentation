@@ -31,9 +31,10 @@ meanful to the model checking techniques we employ here. Such collection is give
 in the file |conats.sats|_. It also contains some other primitives used
 for model checking, which we shall explain as we see more examples.
 
-The complete implementation for producer-consumer problem can be found here todo. 
-You can also read, modify, and verify the implementation via our website for model 
-checking todo. We illustrate some of the code snippets below.
+The complete implementation for producer-consumer problem can be found here 
+:download:`16_reader_writer.dats`. 
+You can also read, modify, and verify the implementation via our website |mcats|_. 
+We illustrate some of the code snippets below.
 
 As indicated in [1]_, a shared object contains a linear object, which in this example is
 a linear buffer. The primitives provided in |conats.sats|_ do not support such type.
@@ -242,7 +243,7 @@ The model checking process goes as follows.  We build a tool, which is able to
 extract a model from the ATS program given above.  Currently, the extracted model is 
 in the modeling langauge CSP#. We then use the state-of-art model checker
 `PAT <http://www.comp.nus.edu.sg/~pat/>`_ to check the generated model. To ease the
-whole process, we set up a website for readers to try this methodology online:
+whole process, we set up a website for readers to try this methodology on-line:
 |mcats|_. The aforementioned example can be found under the
 name "16_reader_writer.dats" in the dropdown list "Select ATS Example". We are working
 on building tools to better relate the model checking result (counterexample) to the original ATS

@@ -122,7 +122,7 @@ is shown below.
 
 In this implemenation, producer only signals the condition variable when the buffer
 is actually empty at that moment. This would lead to the missing of signal if we have
-multiple producers and consumers. (Please refer to [2]_.) In the example
+multiple producers and consumers. (Please refer to section 8.2.2 of [2]_.) In the example
 :download:`16_3_producer_consumer_m_m_signal.dats`, there is two producers, each of
 which inserts only one element, and two consumers, each of which takes out one
 element. And the problem of miss signal would lead to deadlock. The model checker
@@ -138,7 +138,7 @@ Bibliography
 ------------------------
 
 .. [1] http://en.wikipedia.org/wiki/Monitor_%28synchronization%29
-.. [2] todo
+.. [2] `The Art of Multiprocessor Programming <http://www.amazon.com/The-Multiprocessor-Programming-Revised-Reprint/dp/0123973376>`_
 
 
 
