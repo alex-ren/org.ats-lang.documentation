@@ -287,16 +287,6 @@ Table of Contents
    sec02/content
    sec03/content
    sec04/content
-   sec05/content
-   sec06/content
-   sec07/content
-   sec08/content
-
-.. Example of Four-Slot
-.. 
-.. .. literalinclude:: 20_four_slot.dats
-..  :language: text
-..  :linenos:
 
 Bibliography
 --------------------------
