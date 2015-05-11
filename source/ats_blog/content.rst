@@ -9,7 +9,7 @@ Contents:
 
    staload_var/content
    print_misc/content
-   install_misc/content
+   misc/content
    ats2cs/content
    staval/content
 

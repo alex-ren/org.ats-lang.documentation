@@ -38,15 +38,29 @@ like the following:
 
 .. _ATS' website: http://www.ats-lang.org/DOWNLOAD/#installation_srccomp
 
+Usage of *staload*
+--------------------------
+
+Some useful information about *staload* can be found in 
+`Wiki <https://github.com/githwxi/ATS-Postiats/wiki/staload>`_ and my previous 
+`blog <https://groups.google.com/forum/#!msg/ats-lang-users/4_d_tmGZXIA/8Hc7kMLfsesJ>`_.
+
+
 Standard *header* files
 --------------------------
 
-For ATS code of "normal" purpose, we would always include the following code.
+To use the *prelude* library of ATS, we would include the following code:
 
 .. code-block:: none
    
    #include "share/atspre_define.hats"
    #include "share/atspre_staload.hats"
+
+To use the *ML* library of ATS, we would include the following code:
+
+.. code-block:: none
+
+   #include "share/HATS/atspre_staload_libats_ML.hats"
 
 If we want to generate C code used on lower level systems, such as embedded system, 
 we can replace these *header* files with appropriate ones to fit the targeting
