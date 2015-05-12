@@ -2,6 +2,10 @@
 
 ATS-Postiats' Blog
 ==================================
+
+Some other sources of ATS: `ATS Wiki <https://github.com/githwxi/ATS-Postiats/wiki>`_.
+
+
 Contents:
 
 .. toctree::
