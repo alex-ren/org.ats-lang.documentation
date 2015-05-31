@@ -16,5 +16,6 @@ Contents:
    misc/content
    ats2cs/content
    staval/content
+   makefile/content
 
 
